@@ -1,4 +1,5 @@
 import TAny from './TAny';
+import Nil, { TNil } from './TNil';
 
 export default class TCons extends TAny {
   private car: TAny;
@@ -28,5 +29,33 @@ export default class TCons extends TAny {
 
   public setCdr(expr: TAny) {
     this.cdr = expr;
+  }
+}
+
+export class ListBuilder {
+  private len = 0;
+  private head: TCons | undefined;
+  private tail: TCons | undefined;
+
+  public append(expr: TAny) {
+    const cell = new TCons(expr, Nil);
+    if (!this.head) {
+      this.head = cell;
+    }
+
+    if (this.tail) {
+      this.tail.setCdr(cell);
+    }
+    this.tail = cell;
+
+    ++this.len;
+  }
+
+  public get(): TCons | TNil {
+    if (this.head) {
+      return this.head;
+    } else {
+      return Nil;
+    }
   }
 }
