@@ -63,3 +63,24 @@ describe('call function', () => {
     expect(readEval('(- 1 2 3)')).toEqual(new TNumber(-4));
   });
 });
+
+describe('call syntax', () => {
+  test('2 required, 1 optional, 2 argument', () => {
+    expect(readEval('(if true 1)')).toEqual(new TNumber(1));
+  });
+  test('2 required, 1 optional, 3 argument', () => {
+    expect(readEval('(if false 1 2)')).toEqual(new TNumber(2));
+  });
+  test('2 required, 1 optional, 0 argument', () => {
+    expect(() => readEval('(if)')).toThrowError();
+  });
+  test('2 required, 1 optional, 4 argument', () => {
+    expect(() => readEval('(if false 1 2 3)')).toThrowError();
+  });
+  test('0 required, 0 optional, has rest, 0 argument', () => {
+    expect(readEval('(or)')).toEqual(False);
+  });
+  test('0 required, 0 optional, has rest, 1 argument', () => {
+    expect(readEval('(or 1)')).toEqual(new TNumber(1));
+  });
+});

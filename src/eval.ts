@@ -3,6 +3,7 @@ import TAny from './type/TAny';
 import TCons, { ListBuilder } from './type/TCons';
 import TFunction from './type/TFunction';
 import TSymbol from './type/TSymbol';
+import TSyntax from './type/TSyntax';
 
 export function teval(expr: TAny, env: Env): TAny {
   if (expr instanceof TCons) {
@@ -22,6 +23,11 @@ export function teval(expr: TAny, env: Env): TAny {
       const args = argBuilder.get();
       const argCount = argBuilder.length();
       return func.apply(args, argCount);
+    } else if (head instanceof TSyntax) {
+      const syntax = head;
+      const args = expr.Cdr;
+
+      return syntax.apply(args, env);
     } else {
       throw new Error('Not Applicable: ' + head.toString());
     }
