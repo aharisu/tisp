@@ -193,6 +193,25 @@ function syntaxLet(
   }
 }
 
+function syntaxSet(
+  requireArgs: TAny[],
+  optionalArgs: TAny[],
+  restArgs: TAny[],
+  env: Env
+): TAny {
+  const symbol = requireArgs[0];
+  if (symbol instanceof TSymbol) {
+    const val = teval(requireArgs[1], env);
+    if (env.set(symbol, val)) {
+      return Nil;
+    } else {
+      throw new Error('variable not found: ' + symbol.toString());
+    }
+  } else {
+    throw new Error('require symbol but got ' + symbol.toString());
+  }
+}
+
 export function register(env: Env) {
   env.addGlobal(new TSymbol('if'), new TSyntax('if', 2, 1, false, syntaxIf));
   env.addGlobal(new TSymbol('or'), new TSyntax('or', 0, 0, true, syntaxOr));
@@ -206,4 +225,8 @@ export function register(env: Env) {
     new TSyntax('local', 0, 0, true, syntaxLocal)
   );
   env.addGlobal(new TSymbol('let'), new TSyntax('let', 2, 0, false, syntaxLet));
+  env.addGlobal(
+    new TSymbol('set!'),
+    new TSyntax('set!', 2, 0, false, syntaxSet)
+  );
 }

@@ -153,6 +153,14 @@ describe('begin', () => {
 });
 
 describe('local variable', () => {
+  test('let error', () => {
+    const result = () =>
+      readEval(`
+        (let 1 2)
+      `);
+    expect(result).toThrowError();
+  });
+
   test('let', () => {
     const result = readEval(`
     (begin
@@ -206,5 +214,45 @@ describe('local variable', () => {
         a))
     `);
     expect(result).toEqual(new TNumber(2));
+  });
+});
+
+describe('set', () => {
+  test('set not symbol', () => {
+    const result = () =>
+      readEval(`
+        (set! 1 2)
+      `);
+    expect(result).toThrowError();
+  });
+
+  test('variable not found', () => {
+    const result = () =>
+      readEval(`
+        (set! a 1)
+      `);
+    expect(result).toThrowError();
+  });
+
+  test('variable overwrite', () => {
+    const result = readEval(`
+        (begin
+          (let a 1)
+          (set! a 2)
+          a)
+      `);
+    expect(result).toEqual(new TNumber(2));
+  });
+
+  test('nest variable overwrite', () => {
+    const result = readEval(`
+        (local
+          (let a 1)
+          (local
+            (let a 2)
+            (set! a 3))
+          a)
+      `);
+    expect(result).toEqual(new TNumber(1));
   });
 });

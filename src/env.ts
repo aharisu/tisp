@@ -38,6 +38,23 @@ export default class Env {
       this.global[symbol.Name] = expr;
     }
   }
+
+  public set(symbol: TSymbol, expr: TAny): boolean {
+    const name = symbol.Name;
+    for (let index = this.frames.length - 1; index >= 0; --index) {
+      if (name in this.frames[index]) {
+        this.frames[index][name] = expr;
+        return true;
+      }
+    }
+
+    if (name in this.global) {
+      this.global[name] = expr;
+      return true;
+    }
+
+    return false;
+  }
 }
 
 export function registerAll(env: Env) {
