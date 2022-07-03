@@ -3,8 +3,10 @@ import { teval } from '../../eval';
 import { makeReader, read } from '../../read';
 import TAny from '../TAny';
 import { False, True } from '../TBool';
+import TClosure from '../TClosure';
 import Nil from '../TNil';
 import TNumber from '../TNumber';
+import TSymbol from '../TSymbol';
 
 function readEval(str: string): TAny {
   const env = new Env();
@@ -254,5 +256,53 @@ describe('set', () => {
           a)
       `);
     expect(result).toEqual(new TNumber(1));
+  });
+});
+
+describe('fun', () => {
+  test('fun not parameter', () => {
+    const result = () => readEval('(fun)');
+    expect(result).toThrowError();
+  });
+
+  test('fun', () => {
+    const result = readEval('(fun ())');
+    expect(result).toEqual(new TClosure([], 0, []));
+  });
+
+  test('fun 2 parameters', () => {
+    const result = readEval('(fun (a b))');
+    expect(result).toEqual(
+      new TClosure([new TSymbol('a'), new TSymbol('b')], 2, [])
+    );
+  });
+
+  test('fun 2 parameters, 2 bodies', () => {
+    const result = readEval('(fun (a b) 1 2)');
+    expect(result).toEqual(
+      new TClosure([new TSymbol('a'), new TSymbol('b')], 2, [
+        new TNumber(1),
+        new TNumber(2),
+      ])
+    );
+  });
+
+  test('fun call', () => {
+    const result = readEval('((fun () 1))');
+    expect(result).toEqual(new TNumber(1));
+  });
+
+  test('fun call with arguments', () => {
+    const result = readEval('((fun (a b) (+ a b)) 1 2)');
+    expect(result).toEqual(new TNumber(3));
+  });
+
+  test('fun call multiple bodies', () => {
+    const result = readEval(`
+      ((fun (a b)
+            (let c 3)
+            (+ a b c)) 1 2)
+      `);
+    expect(result).toEqual(new TNumber(6));
   });
 });

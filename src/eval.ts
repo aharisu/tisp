@@ -1,5 +1,6 @@
 import Env from './env';
 import TAny from './type/TAny';
+import TClosure from './type/TClosure';
 import TCons, { ListBuilder } from './type/TCons';
 import TFunction from './type/TFunction';
 import TSymbol from './type/TSymbol';
@@ -28,6 +29,11 @@ export function teval(expr: TAny, env: Env): TAny {
       const args = expr.Cdr;
 
       return syntax.apply(args, env);
+    } else if (head instanceof TClosure) {
+      const closure = head;
+      const args = expr.Cdr;
+
+      return closure.apply(args, env);
     } else {
       throw new Error('Not Applicable: ' + head.toString());
     }

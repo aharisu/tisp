@@ -2,6 +2,7 @@ import Env from '../env';
 import { teval } from '../eval';
 import TAny from './TAny';
 import { False, True } from './TBool';
+import TClosure from './TClosure';
 import { isList } from './TList';
 import Nil from './TNil';
 import TSymbol from './TSymbol';
@@ -68,7 +69,7 @@ export default class TSyntax extends TAny {
       for (const arg of args) {
         if (count < this.numRequire) {
           requireArgs.push(arg);
-        } else if (this.numRequire + this.numOptional) {
+        } else if (count < this.numRequire + this.numOptional) {
           optionalArgs.push(arg);
         } else {
           restArgs.push(arg);
@@ -165,13 +166,11 @@ function syntaxLocal(
 
   let result = Nil as TAny;
   for (const expr of restArgs) {
-    console.log(expr.toString());
     result = teval(expr, env);
   }
 
   env.popFrame();
 
-  console.log(result);
   return result;
 }
 
@@ -212,6 +211,28 @@ function syntaxSet(
   }
 }
 
+function syntaxFun(
+  requireArgs: TAny[],
+  optionalArgs: TAny[],
+  restArgs: TAny[],
+  env: Env
+): TAny {
+  const args = requireArgs[0];
+
+  const parameters = [] as TSymbol[];
+  if (isList(args)) {
+    for (const arg of args) {
+      if (arg instanceof TSymbol) {
+        parameters.push(arg);
+      } else {
+        throw new Error('require symbol but got ' + arg.toString());
+      }
+    }
+  }
+
+  return new TClosure(parameters, parameters.length, restArgs);
+}
+
 export function register(env: Env) {
   env.addGlobal(new TSymbol('if'), new TSyntax('if', 2, 1, false, syntaxIf));
   env.addGlobal(new TSymbol('or'), new TSyntax('or', 0, 0, true, syntaxOr));
@@ -229,4 +250,5 @@ export function register(env: Env) {
     new TSymbol('set!'),
     new TSyntax('set!', 2, 0, false, syntaxSet)
   );
+  env.addGlobal(new TSymbol('fun'), new TSyntax('fun', 1, 0, true, syntaxFun));
 }
