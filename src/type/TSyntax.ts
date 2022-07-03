@@ -162,16 +162,18 @@ function syntaxLocal(
   restArgs: TAny[],
   env: Env
 ): TAny {
-  env.pushFrame();
+  try {
+    env.pushFrame();
 
-  let result = Nil as TAny;
-  for (const expr of restArgs) {
-    result = teval(expr, env);
+    let result = Nil as TAny;
+    for (const expr of restArgs) {
+      result = teval(expr, env);
+    }
+
+    return result;
+  } finally {
+    env.popFrame();
   }
-
-  env.popFrame();
-
-  return result;
 }
 
 function syntaxLet(

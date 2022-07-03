@@ -32,24 +32,26 @@ export default class TClosure extends TAny {
         );
       }
 
-      env.pushFrame();
+      try {
+        env.pushFrame();
 
-      let count = 0;
-      for (const arg of args) {
-        if (count < this.numRequire) {
-          env.let(this.parameters[count], arg);
+        let count = 0;
+        for (const arg of args) {
+          if (count < this.numRequire) {
+            env.let(this.parameters[count], arg);
+          }
+          ++count;
         }
-        ++count;
+
+        let result = Nil as TAny;
+        for (const expr of this.body) {
+          result = teval(expr, env);
+        }
+
+        return result;
+      } finally {
+        env.popFrame();
       }
-
-      let result = Nil as TAny;
-      for (const expr of this.body) {
-        result = teval(expr, env);
-      }
-
-      env.popFrame();
-
-      return result;
     } else {
       throw new Error("can't apply improper list: " + args.toString());
     }
